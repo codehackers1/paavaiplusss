@@ -1,0 +1,29 @@
+# Local development convenience — PostgreSQL for Paavai+.
+# NOT a production deployment: no TLS enforcement, no persistence guarantees
+# beyond the named volume, and credentials are dev-grade.
+#
+#   docker compose up -d db
+#   copy .env.example .env   # DATABASE_URL matches the values below
+#   npm run prisma:migrate:dev
+#   npm run prisma:seed
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: paavai-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: paavai
+      POSTGRES_PASSWORD: paavai
+      POSTGRES_DB: paavai
+    ports:
+      - "5432:5432"
+    volumes:
+      - paavai_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paavai -d paavai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  paavai_pgdata:
